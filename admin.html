@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="ku" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thisk Cafe - بەڕێوەبەر (Admin)</title>
+    <style>
+        :root {
+            --bg-color: #121212;
+            --card-bg: #1e1e1e;
+            --accent-color: #f39c12;
+            --text-color: #ffffff;
+            --danger-color: #e74c3c;
+            --success-color: #2ecc71;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .container { width: 100%; max-width: 600px; display: flex; flex-direction: column; gap: 20px; }
+        h1 { font-size: 22px; color: var(--accent-color); text-align: center; margin-bottom: 10px; }
+        .card {
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            border: 1px solid rgba(255,255,255,0.08);
+        }
+        h2 { font-size: 18px; margin-bottom: 15px; border-bottom: 2px solid var(--accent-color); padding-bottom: 5px; display: inline-block; }
+        .form-group { margin-bottom: 15px; display: flex; flex-direction: column; gap: 5px; }
+        label { font-size: 14px; opacity: 0.9; }
+        input, select, textarea {
+            padding: 10px;
+            border-radius: 8px;
+            background: rgba(255,255,255,0.07);
+            border: 1px solid rgba(255,255,255,0.15);
+            color: var(--text-color);
+            outline: none;
+        }
+        input:focus, textarea:focus { border-color: var(--accent-color); }
+        .btn {
+            background: var(--accent-color);
+            color: #000;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s;
+            width: 100%;
+        }
+        .btn:hover { opacity: 0.9; }
+        .order-card {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.1);
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .order-header { display: flex; justify-content: space-between; font-weight: bold; color: var(--accent-color); }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>بەڕێوەبەری Thisk Cafe (Admin Panel)</h1>
+
+        <!-- Settings Customization Card -->
+        <div class="card">
+            <h2>ڕێکخستن و ڕووکاری سایت</h2>
+            <div class="form-group">
+                <label>ناوی کافە:</label>
+                <input type="text" id="cafeNameInput" value="Thisk Cafe">
+            </div>
+            <div class="form-group">
+                <label>لینک/ڤیدیۆی لۆگۆ (Logo URL):</label>
+                <input type="text" id="cafeLogoInput" placeholder="https://...">
+            </div>
+            <div class="form-group">
+                <label>تێکستی تایکەری ڕیکلام (Marquee Text):</label>
+                <input type="text" id="marqueeTextInput" value="بەخێر هاتن بۆ Thisk Cafe - مێنۆی دیجیتالی و سیستەمی پێشکەوتوو">
+            </div>
+            <div class="form-group">
+                <label>رەنگی باکگراوندی تایکەر:</label>
+                <input type="color" id="marqueeBgInput" value="#f39c12">
+            </div>
+            <div class="form-group">
+                <label>رەنگی سەرەکی (Accent Color):</label>
+                <input type="color" id="accentColorInput" value="#f39c12">
+            </div>
+            <button class="btn" onclick="saveSettings()">پاشەکەوتکردنی گۆڕانکارییەکان</button>
+        </div>
+
+        <!-- Orders Management -->
+        <div class="card">
+            <h2>داواکارییەکانی کڕیاران</h2>
+            <div id="ordersContainer">
+                <p style="opacity: 0.6; text-align: center;">هیچ داواکارییەک نییە تا ئێستا.</p>
+            </div>
+            <button class="btn" style="background: var(--danger-color); color: #fff; margin-top: 10px;" onclick="clearOrders()">سڕینەوەی هەموو داواکارییەکان</button>
+        </div>
+    </div>
+
+    <script>
+        function saveSettings() {
+            const settings = {
+                name: document.getElementById('cafeNameInput').value,
+                logo: document.getElementById('cafeLogoInput').value,
+                marqueeText: document.getElementById('marqueeTextInput').value,
+                marqueeBg: document.getElementById('marqueeBgInput').value,
+                marqueeTextColor: '#000000',
+                bg1: '#0a0a0a',
+                bg2: '#1a1a1a',
+                accent: document.getElementById('accentColorInput').value
+            };
+            localStorage.setItem('thisk_settings', JSON.stringify(settings));
+            alert('گۆڕانکارییەکان بە سەرکەوتوویی پاشەکەوت کران!');
+        }
+
+        function loadOrders() {
+            const orders = JSON.parse(localStorage.getItem('thisk_orders')) || [];
+            const container = document.getElementById('ordersContainer');
+            if(orders.length === 0) {
+                container.innerHTML = '<p style="opacity: 0.6; text-align: center;">هیچ داواکارییەک نییە تا ئێستا.</p>';
+                return;
+            }
+            container.innerHTML = '';
+            orders.forEach((ord, idx) => {
+                let itemsList = ord.items.map(i => `<li>${i.name} - ${i.price} IQD</li>`).join('');
+                container.innerHTML += `
+                    <div class="order-card">
+                        <div class="order-header">
+                            <span>مێزی ژمارە ${ord.table}</span>
+                            <span>${ord.time}</span>
+                        </div>
+                        <ul>${itemsList}</ul>
+                        <div style="font-weight: bold; margin-top: 5px; color: var(--success-color);">کۆی گشتی: ${ord.total} IQD</div>
+                    </div>
+                `;
+            });
+        }
+
+        function clearOrders() {
+            localStorage.removeItem('thisk_orders');
+            loadOrders();
+        }
+
+        window.onload = loadOrders;
+    </script>
+</body>
+</html>
